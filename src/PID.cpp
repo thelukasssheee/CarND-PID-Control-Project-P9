@@ -84,6 +84,7 @@ void PID::TotalError(double cte) {
   tot_error += abs(cte);
 }
 
+
 void PID::Twiddle() {
   /*
   # Make this tolerance bigger if you are timing out!
@@ -122,7 +123,7 @@ void PID::Twiddle() {
   // Enter Twiddle optimizer
   if (optimizer_on && (dK[0] + dK[1] + dK[2] > tolerance)) {
     // Normalize total error
-    tot_error = tot_error / ((t1-t0)*10);
+    tot_error = tot_error / t_delta;
     cout << "Iteration " << iteration << " with [Kp,Ki,Kd] = [";
     cout << K[0] << "," << K[1] << "," << K[2] << "] finished. ";
     cout << "Error: ";

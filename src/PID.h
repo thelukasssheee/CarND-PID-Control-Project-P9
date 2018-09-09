@@ -4,7 +4,7 @@
 
 #include <math.h>
 #include <vector>
-#include <ctime>
+#include <chrono>
 
 class PID {
   public:
@@ -51,9 +51,11 @@ class PID {
     /*
     * Timing
     */
-    double t0;
-    double t1;
-    std::clock_t start;
+    std::chrono::time_point<std::chrono::system_clock> t0;
+    std::chrono::time_point<std::chrono::system_clock> t1;
+    std::chrono::time_point<std::chrono::system_clock> t_last;
+    double t_delta;
+    double dist_driven;
 
 
 

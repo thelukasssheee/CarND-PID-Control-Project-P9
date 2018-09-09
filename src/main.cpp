@@ -4,7 +4,7 @@
 #include "PID.h"
 #include <math.h>
 #include <vector>
-#include <ctime>
+#include <chrono>
 
 // for convenience
 using json = nlohmann::json;
@@ -43,9 +43,9 @@ int main()
   pid.Init();
 
   // Initialize timing variables
-  pid.start = std::clock();
+  // pid.start = std::clock();
 
-  pid.t0 = (std::clock() - pid.start) / (double) CLOCKS_PER_SEC;
+  pid.t0 = std::chrono::system_clock::now();
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -72,8 +72,13 @@ int main()
 
           // Reset simulator if vehicle has left the road
           // if ((t_delta.count() > 5.) && (abs(cte) > 5.)) {
-          pid.t1 = (std::clock() - pid.start) / (double) CLOCKS_PER_SEC;
-          if (((pid.t1 - pid.t0) > 0.3) && (abs(cte) > 5.)) {
+          pid.t_last = pid.t1;
+          pid.t1 = std::chrono::system_clock::now();
+          pid.t_delta = 0.001 *
+            std::chrono::duration_cast<std::chrono::milliseconds>
+            (pid.t1-pid.t0).count();
+          if ( ((pid.t_delta > 3.) && (abs(cte) > 5.)) ||
+                 pid.t_delta > 80 ) {
             // Generate error meassage in std::cout
             std::cout << "Reset!" << std::endl;
 
@@ -85,7 +90,7 @@ int main()
             pid.Init();
 
             // Reset timer
-            pid.t0 = (std::clock() - pid.start) / (double) CLOCKS_PER_SEC;
+            pid.t0 = std::chrono::system_clock::now();
 
             // Exit function
             return;
