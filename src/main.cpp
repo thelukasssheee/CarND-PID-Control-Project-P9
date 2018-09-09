@@ -3,6 +3,8 @@
 #include "json.hpp"
 #include "PID.h"
 #include <math.h>
+#include <vector>
+#include <unistd.h>
 
 // for convenience
 using json = nlohmann::json;
@@ -32,8 +34,11 @@ int main()
 {
   uWS::Hub h;
 
+  // DONE: Initialize the pid variable.
   PID pid;
-  // TODO: Initialize the pid variable.
+  pid.optimizer_on = true;
+  pid.Init();
+  // pid.Init(Kp_init, Ki_init, Kd_init);
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -57,15 +62,39 @@ int main()
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
-          
-          // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+
+          // Reset simulator if vehicle has left the road
+          if (abs(cte) > 5.) {
+            // Generate error meassage in std::cout
+            std::cout << "Reset!" << std::endl;
+            // Generate and send error message for simulator to trigger the reset
+            std::string msg("42[\"reset\", {}]");
+            ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+            // Wait for two seconds before re-initialization
+            // sleep_until(std::chrono::system_clock::now() + seconds(2));
+            // usleep(5 * 1000000);
+
+            // Re-initialize PID controller:
+            // new PID factors from Twiggle, error terms reset to zero
+            pid.Init();
+            // TODO total error update?
+            return;
+          }
+
+          // Update PID Error terms
+          pid.UpdateError(cte);
+          pid.TotalError(cte);
+          // Calculate steer angle
+          steer_value = pid.CalcSteerAngle(cte, speed, angle);
+          // Limit steer angle to max values
+          if (steer_value > 1.0)  { steer_value = 1.0; }
+          if (steer_value < -1.0) { steer_value = -1.0;}
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = 0.3;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          // std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {
@@ -92,12 +121,13 @@ int main()
   });
 
   h.onConnection([&h](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
-    std::cout << "Connected!!!" << std::endl;
+    std::cout << "Connected!!! Handle: " << &h << std::endl;
+
   });
 
   h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER> ws, int code, char *message, size_t length) {
     ws.close();
-    std::cout << "Disconnected" << std::endl;
+    std::cout << "Disconnected!!! Handle: " << &h << std::endl;
   });
 
   int port = 4567;
@@ -111,4 +141,6 @@ int main()
     return -1;
   }
   h.run();
+
+  return 0;
 }

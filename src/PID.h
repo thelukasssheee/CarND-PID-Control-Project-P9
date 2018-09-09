@@ -1,46 +1,87 @@
 #ifndef PID_H
 #define PID_H
 
+#include <math.h>
+#include <vector>
+
 class PID {
-public:
-  /*
-  * Errors
-  */
-  double p_error;
-  double i_error;
-  double d_error;
+  public:
+    /*
+    * Errors
+    */
+    double p_error;
+    double i_error;
+    double d_error;
+    double tot_error;
+    double tot_error_last;
 
-  /*
-  * Coefficients
-  */ 
-  double Kp;
-  double Ki;
-  double Kd;
+    /*
+    * Init-values
+    */
+    double Kp_init;
+    double Ki_init;
+    double Kd_init;
 
-  /*
-  * Constructor
-  */
-  PID();
+    /*
+    * Coefficients
+    */
+    double Kp;
+    double Ki;
+    double Kd;
 
-  /*
-  * Destructor.
-  */
-  virtual ~PID();
+    /*
+    * Twiggle optimization parameters
+    */
+    std::vector<double> dK;
+    std::vector<double> K;
+    unsigned int iteration;
+    unsigned int twiddle_step;
+    double tolerance;
 
-  /*
-  * Initialize PID.
-  */
-  void Init(double Kp, double Ki, double Kd);
+    /*
+    * Initialization flag
+    */
+    bool is_initialized = false;
+    bool optimizer_on = false;
 
-  /*
-  * Update the PID error variables given cross track error.
-  */
-  void UpdateError(double cte);
+    /*
+    * Constructor
+    */
+    PID();
 
-  /*
-  * Calculate the total PID error.
-  */
-  double TotalError();
+    /*
+    * Destructor.
+    */
+    virtual ~PID();
+
+    /*
+    * Initialize PID.
+    */
+    void Init();
+    // void Init(double Kp, double Ki, double Kd);
+
+    /*
+    * Calculate steer angle based on PID.
+    */
+    double CalcSteerAngle(double cte,double speed, double angle);
+
+    /*
+    * Update the PID error variables given cross track error.
+    */
+    void UpdateError(double cte);
+
+    /*
+    * Calculate the total PID error.
+    */
+    void TotalError(double cte);
+
+    /*
+    * Twiddle optimizer to tune parameters
+    */
+    void Twiddle();
+    void Twiddle_Logic();
+
+
 };
 
 #endif /* PID_H */
