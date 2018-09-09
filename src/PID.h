@@ -1,8 +1,10 @@
 #ifndef PID_H
 #define PID_H
 
+
 #include <math.h>
 #include <vector>
+#include <ctime>
 
 class PID {
   public:
@@ -12,8 +14,9 @@ class PID {
     double p_error;
     double i_error;
     double d_error;
-    double tot_error;
-    double tot_error_last;
+    double tot_error = 0.;
+    double tot_error_last = 0.;
+    double tot_error_best = 0.;
 
     /*
     * Init-values
@@ -36,6 +39,7 @@ class PID {
     std::vector<double> K;
     unsigned int iteration;
     unsigned int twiddle_step;
+    unsigned int K_it;
     double tolerance;
 
     /*
@@ -43,6 +47,15 @@ class PID {
     */
     bool is_initialized = false;
     bool optimizer_on = false;
+
+    /*
+    * Timing
+    */
+    double t0;
+    double t1;
+    std::clock_t start;
+
+
 
     /*
     * Constructor

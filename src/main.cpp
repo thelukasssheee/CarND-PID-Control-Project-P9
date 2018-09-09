@@ -4,7 +4,7 @@
 #include "PID.h"
 #include <math.h>
 #include <vector>
-#include <unistd.h>
+#include <ctime>
 
 // for convenience
 using json = nlohmann::json;
@@ -37,8 +37,15 @@ int main()
   // DONE: Initialize the pid variable.
   PID pid;
   pid.optimizer_on = true;
+  pid.Kp_init = 0.3;
+  pid.Ki_init = 0.002;
+  pid.Kd_init = 4.;
   pid.Init();
-  // pid.Init(Kp_init, Ki_init, Kd_init);
+
+  // Initialize timing variables
+  pid.start = std::clock();
+
+  pid.t0 = (std::clock() - pid.start) / (double) CLOCKS_PER_SEC;
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -64,28 +71,33 @@ int main()
           */
 
           // Reset simulator if vehicle has left the road
-          if (abs(cte) > 5.) {
+          // if ((t_delta.count() > 5.) && (abs(cte) > 5.)) {
+          pid.t1 = (std::clock() - pid.start) / (double) CLOCKS_PER_SEC;
+          if (((pid.t1 - pid.t0) > 0.3) && (abs(cte) > 5.)) {
             // Generate error meassage in std::cout
             std::cout << "Reset!" << std::endl;
+
             // Generate and send error message for simulator to trigger the reset
             std::string msg("42[\"reset\", {}]");
             ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-            // Wait for two seconds before re-initialization
-            // sleep_until(std::chrono::system_clock::now() + seconds(2));
-            // usleep(5 * 1000000);
 
             // Re-initialize PID controller:
-            // new PID factors from Twiggle, error terms reset to zero
             pid.Init();
-            // TODO total error update?
+
+            // Reset timer
+            pid.t0 = (std::clock() - pid.start) / (double) CLOCKS_PER_SEC;
+
+            // Exit function
             return;
           }
 
           // Update PID Error terms
           pid.UpdateError(cte);
           pid.TotalError(cte);
+
           // Calculate steer angle
           steer_value = pid.CalcSteerAngle(cte, speed, angle);
+
           // Limit steer angle to max values
           if (steer_value > 1.0)  { steer_value = 1.0; }
           if (steer_value < -1.0) { steer_value = -1.0;}
