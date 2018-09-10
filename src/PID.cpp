@@ -50,6 +50,9 @@ void PID::Init() {
     }
     // Twiddle is finished
     else {
+      Kp = K_best[0];
+      Ki = K_best[1];
+      Kd = K_best[2];
       cout << "PID controller starts over with final parameters from ";
       cout << "PID optimization. ";
       cout << "[Kp,Ki,Kd] = [" <<Kp<<", "<<Ki<<", "<<Kd<< "] !" << endl;
@@ -129,12 +132,14 @@ void PID::Twiddle() {
     cout << "Error: ";
     cout << tot_error << " (curr) vs " << tot_error_best << " (best)." << endl;
     Twiddle_Logic();
+    Kp = K[0]; Ki = K[1]; Kd = K[2];
     iteration += 1;
   }
 
 
   // Optimization finished!
   else {
+    Kp = K_best[0]; Ki = K_best[1]; Kd = K_best[2];
     cout << "-----------------------------------------------" << endl;
     cout << "Optimizer finished! Total vs. best error = ";
     cout << tot_error << ":" << tot_error_best << "." << endl;
@@ -177,6 +182,7 @@ void PID::Twiddle_Logic() {
       cout << "  Case 1, K_it=" << K_it;
       dK[K_it] *= 1.1;
       tot_error_best = tot_error;
+      K_best = K;
       break;
     }
 
@@ -190,6 +196,7 @@ void PID::Twiddle_Logic() {
       cout << "  Case 3, K_it=" << K_it;
       dK[K_it] *= 1.1;
       tot_error_best = tot_error;
+      K_best = K;
       break;
     }
 
@@ -212,6 +219,8 @@ void PID::Twiddle_Logic() {
 
   // Output new parameters
   cout << ". New params = [" <<K[0]<<","<<K[1]<<","<<K[2]<< "]." << endl;
+  Kp = K[0]; Ki = K[1]; Kd = K[2];
+
 
   /*
     for i in range(len(p)):

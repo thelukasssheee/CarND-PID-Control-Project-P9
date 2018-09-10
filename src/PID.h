@@ -37,6 +37,7 @@ class PID {
     */
     std::vector<double> dK;
     std::vector<double> K;
+    std::vector<double> K_best;
     unsigned int iteration;
     unsigned int twiddle_step;
     unsigned int K_it;
