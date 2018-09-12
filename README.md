@@ -179,5 +179,7 @@ I'm looking forward to the next project with an MPC controller, which might solv
 
 
 ### Video material
+
 [Twiddle optimizer](https://youtu.be/y4xi85PcBZs)
+
 [Final: complete lap](https://youtu.be/Xx0yX1ZeNuk)
