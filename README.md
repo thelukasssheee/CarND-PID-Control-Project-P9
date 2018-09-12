@@ -176,3 +176,8 @@ Additionally, it became obvious, that constant parameters over the entire speed 
 Furthermore, it would be an option to have controller parameters dependent on drive speed, curve radius and - for real life situations - ambient conditions, road conditions etc. Especially, the wobbling / oscillating driving behavior would be not at all acceptable for passengers.
 
 I'm looking forward to the next project with an MPC controller, which might solve these shortcomings altogether!
+
+
+### Video material
+[Twiddle optimizer](https://youtu.be/y4xi85PcBZs)
+[Final: complete lap](https://youtu.be/Xx0yX1ZeNuk)
