@@ -150,17 +150,18 @@ The result from every iteration is shown in the console and written to a text fi
     Iteration 8 with [Kp,Ki,Kd] = [0.301475,0.00341133,7.7775] finished. Error: 16.9628 (curr) vs 16.7749 (best).
     ...
 
-[This video](LINKS MISSING) shows how the simulation resets and the next optimizer iteration is starting.  
+An example of this file is stored in in this repository in `\Optimizer_results (Example).txt`.
+
+[This video](https://youtu.be/y4xi85PcBZs) shows how the simulation resets and the next optimizer iteration is starting.  
 
 ### Solution and final PID parameters
 Eventually, the optimizer exited providing the following parameters for the PID controller:
 
-    Kp_best = 0.31;
-    Ki_best = 0.00223;
-    Kd_best = 5.1;
+    Kp_best = 0.402086;
+    Ki_best = 0.00408801;
+    Kd_best = 11.7821;
 
-A video of the final solution using these parameters can be watched on [Youtube](LINKS MISSING).
-
+A video of the final solution using these parameters can be watched on [Youtube](https://youtu.be/Xx0yX1ZeNuk).
 
 ### Discussion
 It was observed, that Twiddle is in fact sometimes being stuck in local minimas. When I started the algorithm several times with slightly different initialization values for K, a different "best" solution was obtained every single time. Potentially, it could be more suitable to define a large Design-of-experiments plan and look more into detail at areas indicating sweet spots.  
@@ -169,4 +170,4 @@ Additionally, it became obvious, that constant parameters over the entire speed 
 
 Furthermore, it would be an option to have controller parameters dependent on drive speed, curve radius and - for real life situations - ambient conditions, road conditions etc. Especially, the wobbling / oscillating driving behavior would be not at all acceptable for passengers.
 
-I'm looking forward to the next project with an MPC controller, which might solve these issues altogether!
+I'm looking forward to the next project with an MPC controller, which might solve these shortcomings altogether!
