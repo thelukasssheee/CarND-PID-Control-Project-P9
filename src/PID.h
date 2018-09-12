@@ -5,6 +5,8 @@
 #include <math.h>
 #include <vector>
 #include <chrono>
+#include <iostream>
+#include <fstream>
 
 class PID {
   public:
@@ -58,6 +60,8 @@ class PID {
     double t_delta;
     double dist_driven;
 
+    // Results txt file
+    std::ofstream CSV;
 
 
     /*

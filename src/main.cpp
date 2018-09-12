@@ -37,9 +37,9 @@ int main()
   // DONE: Initialize the pid variable.
   PID pid;
   pid.optimizer_on = true;
-  pid.Kp_init = 0.3;
-  pid.Ki_init = 0.002;
-  pid.Kd_init = 4.;
+  pid.Kp_init = 0.31;
+  pid.Ki_init = 0.00223694;
+  pid.Kd_init = 5.1;
   pid.Init();
 
   // Initialize timing variables

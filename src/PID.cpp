@@ -1,5 +1,6 @@
 #include "PID.h"
 #include <iostream>
+#include <fstream>
 #include <math.h>
 #include <vector>
 
@@ -9,9 +10,13 @@ using namespace std;
 * TODO: Complete the PID class.
 */
 
-PID::PID() {}
+PID::PID() {
+  CSV.open ("Optimizer_results.txt");
+}
 
-PID::~PID() {}
+PID::~PID() {
+  CSV.close();
+}
 
 // void PID::Init(double Kp_init, double Ki_init, double Kd_init) {
 void PID::Init() {
@@ -27,6 +32,8 @@ void PID::Init() {
       Twiddle();
       cout << "PID controller successfully initialized with [Kp,Ki,Kd] = [";
       cout << Kp << ", " << Ki << ", " << Kd << "] !" << endl;
+      CSV << "PID controller successfully initialized with [Kp,Ki,Kd] = [";
+      CSV << Kp << ", " << Ki << ", " << Kd << "] !" << endl;
       // Set initialized flag to true
       is_initialized = true;
       return;
@@ -131,6 +138,10 @@ void PID::Twiddle() {
     cout << K[0] << "," << K[1] << "," << K[2] << "] finished. ";
     cout << "Error: ";
     cout << tot_error << " (curr) vs " << tot_error_best << " (best)." << endl;
+    CSV << "Iteration " << iteration << " with [Kp,Ki,Kd] = [";
+    CSV << K[0] << "," << K[1] << "," << K[2] << "] finished. ";
+    CSV << "Error: ";
+    CSV << tot_error << " (curr) vs " << tot_error_best << " (best)." << endl;
     Twiddle_Logic();
     Kp = K[0]; Ki = K[1]; Kd = K[2];
     iteration += 1;
@@ -147,6 +158,15 @@ void PID::Twiddle() {
     cout << " Kp = " << Kp << endl;
     cout << " Ki = " << Kp << endl;
     cout << " Kd = " << Kp << endl;
+    CSV << "-----------------------------------------------" << endl;
+    CSV << "Optimizer finished! Total vs. best error = ";
+    CSV << tot_error << ":" << tot_error_best << "." << endl;
+    CSV << "Obtained parameters:" << endl;
+    CSV << " Kp = " << Kp << endl;
+    CSV << " Ki = " << Kp << endl;
+    CSV << " Kd = " << Kp << endl;
+    CSV.close();
+
     // TODO: exit program or run with best parameters
     optimizer_on = false;
     is_initialized = true;
