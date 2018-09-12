@@ -6,25 +6,25 @@
 
 using namespace std;
 
-/*
-* TODO: Complete the PID class.
-*/
-
+// Constructor
 PID::PID() {
+  // Create file for optimizer outputs
   CSV.open ("Optimizer_results.txt");
 }
 
+// Destructor
 PID::~PID() {
   CSV.close();
 }
 
-// void PID::Init(double Kp_init, double Ki_init, double Kd_init) {
+// PID controller init function
 void PID::Init() {
-  // (Re-)Initialize error variables
+  // (Re-)Initialize error variables (at beginning and at each iteration)
   p_error = 0.;
   i_error = 0.;
   d_error = 0.;
 
+  // Check if Twiddle optimizer shall be used
   if (optimizer_on) {
     // Check initialization status and print out parameters if necessary
     if (!is_initialized) {
@@ -69,10 +69,12 @@ void PID::Init() {
 
 }
 
+// Calculate steering angle
 double PID::CalcSteerAngle(double cte,double speed, double angle) {
   return -Kp*p_error -Ki*i_error - Kd*d_error;
 }
 
+// Calculate error terms
 void PID::UpdateError(double cte) {
   // Differential term:
   // current error minus previous error. Previous error still in p_error
@@ -90,11 +92,12 @@ void PID::UpdateError(double cte) {
   p_error  = cte;
 }
 
+// Calculate total error (error term for optimizer)
 void PID::TotalError(double cte) {
   tot_error += abs(cte);
 }
 
-
+// Twiddle logic from Udacity course, ported to a subfunction style
 void PID::Twiddle() {
   /*
   # Make this tolerance bigger if you are timing out!
@@ -173,6 +176,7 @@ void PID::Twiddle() {
   }
 }
 
+// Twiddle Logic subfunction
 void PID::Twiddle_Logic() {
   if (iteration == 0) {
     return;

@@ -34,18 +34,18 @@ int main()
 {
   uWS::Hub h;
 
-  // DONE: Initialize the pid variable.
+  // Initialize the pid variable.
   PID pid;
-  pid.optimizer_on = true;
-  pid.Kp_init = 0.31;
-  pid.Ki_init = 0.00223694;
-  pid.Kd_init = 5.1;
+  pid.Kp_init = 0.402086;   // 0.31;
+  pid.Ki_init = 0.00408801; // 0.00223694;
+  pid.Kd_init = 11.7821;    // 5.1;
+  pid.optimizer_on = false; // Use Twiddle optimizer (true) or just run (false)
   pid.Init();
 
-  // Initialize timing variables
-  // pid.start = std::clock();
 
-  pid.t0 = std::chrono::system_clock::now();
+
+  // Initialize timing variable
+    pid.t0 = std::chrono::system_clock::now();
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -63,22 +63,20 @@ int main()
           double speed = std::stod(j[1]["speed"].get<std::string>());
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
           double steer_value;
-          /*
-          * TODO: Calcuate steering value here, remember the steering value is
-          * [-1, 1].
-          * NOTE: Feel free to play around with the throttle and speed. Maybe use
-          * another PID controller to control the speed!
-          */
 
-          // Reset simulator if vehicle has left the road
-          // if ((t_delta.count() > 5.) && (abs(cte) > 5.)) {
+          // Check time conditions since last execution
           pid.t_last = pid.t1;
           pid.t1 = std::chrono::system_clock::now();
           pid.t_delta = 0.001 *
             std::chrono::duration_cast<std::chrono::milliseconds>
             (pid.t1-pid.t0).count();
+
+          // Check reset conditions:
+          // 1: simulation ran for at least 3 seconds & vehicle left road OR
+          // 2: simulation finished one lap and twiddle optimizer was used
+          // Otherwise controller runs endlessly.
           if ( ((pid.t_delta > 3.) && (abs(cte) > 5.)) ||
-                 pid.t_delta > 80 ) {
+               ((pid.t_delta > 80) && pid.optimizer_on) ) {
             // Generate error meassage in std::cout
             std::cout << "Reset!" << std::endl;
 
@@ -98,6 +96,8 @@ int main()
 
           // Update PID Error terms
           pid.UpdateError(cte);
+
+          // Update total error for optimizer
           pid.TotalError(cte);
 
           // Calculate steer angle
@@ -107,6 +107,7 @@ int main()
           if (steer_value > 1.0)  { steer_value = 1.0; }
           if (steer_value < -1.0) { steer_value = -1.0;}
 
+          // Send steering angle values to simulator
           json msgJson;
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = 0.3;
